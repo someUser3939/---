@@ -1,5 +1,5 @@
 import flet as ft
-from api import fetch_weather
+from models.api import fetch_weather
 
 def main_ui(page: ft.Page):
     # Настройки главного окна
@@ -35,7 +35,12 @@ def main_ui(page: ft.Page):
         result_text.value = "⌛ Загрузка..."
         page.update()
 
-        weather = fetch_weather(city)
+        try:
+            weather = fetch_weather(city)
+        except RuntimeError as error:
+            result_text.value = f"⚠️ {error}"
+            page.update()
+            return
 
         if weather:
             result_text.value = (
@@ -49,8 +54,8 @@ def main_ui(page: ft.Page):
         
         page.update() # Обновляем экран, чтобы применить изменения
 
-    search_button = ft.ElevatedButton(
-        text="Узнать погоду", 
+    search_button = ft.Button(
+        content="Узнать погоду", 
         on_click=search_click, 
         width=250
     )
