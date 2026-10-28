@@ -10,12 +10,10 @@ logging.basicConfig(
 def fetch_weather(city: str) -> dict | None:
     """Делает запрос к API и возвращает только нужные данные или None."""
     url = "https://api.openweathermap.org/data/2.5/weather"
-    api_key = os.getenv("b3433d45eb2e920808467ffe4af32cc8")
+    api_key = os.getenv("OPENWEATHER_API_KEY")
     if not api_key:
         raise RuntimeError("Не задан ключ OPENWEATHER_API_KEY")
-        logging.info('api не задан')
 
-    
     try:
         response = requests.get(
             url,
@@ -29,14 +27,19 @@ def fetch_weather(city: str) -> dict | None:
         )
         if response.status_code == 200:
             data = response.json()
+            logging.info("Погода для города %s успешно получена", city)
             return {
                 "city": data["name"],
                 "temp": round(data["main"]["temp"]),
                 "desc": data["weather"][0]["description"].capitalize(),
                 "humidity": data["main"]["humidity"]
             }
+        logging.warning(
+            "OpenWeatherMap вернул статус %s для города %s",
+            response.status_code,
+            city,
+        )
         return None
-        logging.info('requests complete')
     except requests.exceptions.RequestException:
+        logging.exception("Ошибка запроса погоды для города %s", city)
         return None
-        logging.info('erro requests')
